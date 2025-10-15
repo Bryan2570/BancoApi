@@ -19,5 +19,4 @@ public partial class Cliente
 
     public virtual Persona IdPersonaNavigation { get; set; } = null!;
 
-    //public Persona Persona { get; set; } 
 }

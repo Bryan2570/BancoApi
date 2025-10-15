@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BancoApi.Models;
 
@@ -14,4 +15,7 @@ public partial class Movimiento
     public decimal Valor { get; set; }
 
     public decimal Saldo { get; set; }
-}
+
+    public int IdCuenta { get; set; }
+
+    }

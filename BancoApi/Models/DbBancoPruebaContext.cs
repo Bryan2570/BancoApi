@@ -79,18 +79,25 @@ public partial class DbBancoPruebaContext : DbContext
             entity.ToTable("Movimiento");
 
             entity.Property(e => e.IdMovimiento).HasColumnName("idMovimiento");
+
             entity.Property(e => e.Fecha)
                 .HasColumnType("datetime")
                 .HasColumnName("fecha");
+
             entity.Property(e => e.Saldo)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("saldo");
+
             entity.Property(e => e.TipoMovimiento)
                 .HasMaxLength(50)
                 .HasColumnName("tipo_movimiento");
+
+
             entity.Property(e => e.Valor)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("valor");
+
+            entity.Property(e => e.IdCuenta).HasColumnName("idCuenta");
         });
 
         modelBuilder.Entity<Persona>(entity =>
