@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BancoApi.Models;
 
-public partial class Cliente
+public partial class Cliente 
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int IdCliente { get; set; }
 
     public string Contrasena { get; set; } = null!;
@@ -14,4 +18,6 @@ public partial class Cliente
     public int IdPersona { get; set; }
 
     public virtual Persona IdPersonaNavigation { get; set; } = null!;
+
+    //public Persona Persona { get; set; } 
 }

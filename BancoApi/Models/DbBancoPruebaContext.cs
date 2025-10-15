@@ -32,7 +32,7 @@ public partial class DbBancoPruebaContext : DbContext
         {
             entity
                 .HasNoKey()
-                .ToTable("Cliente");
+                .ToTable("Cliente").HasKey(c => c.IdCliente);
 
             entity.Property(e => e.Contrasena)
                 .HasMaxLength(100)

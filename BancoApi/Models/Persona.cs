@@ -17,5 +17,5 @@ public partial class Persona
 
     public string Direccion { get; set; } = null!;
 
-    public string? Telefono { get; set; }
+    public string Telefono { get; set; }
 }
