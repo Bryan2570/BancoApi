@@ -45,7 +45,9 @@ namespace BancoApi.Controllers
                 message = "Movimiento Creado Correctamente!",
                 movimiento = request
             });
+
         }
+        
 
         [HttpPut]
         [Route("Actualizar/{id:int}")]
@@ -85,6 +87,86 @@ namespace BancoApi.Controllers
                 movimiento = movimiento
             });
         }
+
+
+        [HttpPost]
+        [Route("RegistrarMovimiento")]
+        public async Task<IActionResult> RegistrarMovimiento([FromBody] Movimiento request)
+        {
+            if (request == null)
+                return BadRequest("Request inválido.");
+
+            if (request.IdCuenta <= 0)
+                return BadRequest("IdCuenta inválido.");
+
+            if (request.Valor <= 0)
+                return BadRequest("El valor debe ser mayor que cero.");
+
+            if (string.IsNullOrWhiteSpace(request.TipoMovimiento))
+                return BadRequest("TipoMovimiento es requerido (RETIRO o DEPOSITO).");
+
+            var tipo = request.TipoMovimiento.Trim().ToUpperInvariant();
+
+            if (tipo != "RETIRO" && tipo != "DEPOSITO")
+                return BadRequest("TipoMovimiento inválido. Debe ser 'RETIRO' o 'DEPOSITO'.");
+
+            // Buscar cuenta
+            var cuenta = await _dbBankContext.Cuenta
+                .FirstOrDefaultAsync(c => c.IdCuenta == request.IdCuenta);
+
+            if (cuenta == null)
+                return NotFound("La cuenta no existe");
+
+            decimal saldoActual = cuenta.SaldoInicial;
+
+            if (tipo == "RETIRO")
+            {
+                const decimal LIMITE_DIARIO = 1000m;
+
+                var inicioDia = DateTime.Today;
+                var finDia = inicioDia.AddDays(1);
+
+                var totalRetirosHoy = await _dbBankContext.Movimientos
+                    .Where(m => m.IdCuenta == cuenta.IdCuenta &&
+                                m.TipoMovimiento.ToUpper() == "RETIRO" &&
+                                m.Fecha >= inicioDia && m.Fecha < finDia)
+                    .SumAsync(m => m.Valor);
+
+                decimal retiroSolicitado = request.Valor;
+
+                if (totalRetirosHoy + retiroSolicitado > LIMITE_DIARIO)
+                    return BadRequest("Cupo diario Excedido");
+
+                if (saldoActual < retiroSolicitado)
+                    return BadRequest("Saldo no disponible");
+
+                saldoActual -= retiroSolicitado;
+            }
+            else if (tipo == "DEPOSITO")
+            {
+                saldoActual += request.Valor;
+            }
+
+            // Actualizar cuenta y movimiento
+            request.Fecha = DateTime.Now;
+            request.Saldo = saldoActual;
+
+            cuenta.SaldoInicial = saldoActual;
+
+            _dbBankContext.Movimientos.Add(request);
+            await _dbBankContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Movimiento registrado correctamente",
+                saldoActual = saldoActual,
+                movimiento = request
+            });
+        }
+
+
+
+
 
     }
 }

@@ -15,7 +15,7 @@ public partial class Cuentum
 
     public string TipoCuenta { get; set; } = null!;
 
-    public decimal? SaldoInicial { get; set; }
+    public decimal SaldoInicial { get; set; }
 
     public bool? Estado { get; set; }
 

@@ -32,7 +32,7 @@ namespace BancoApi.Controllers
         {
             var client = await _dbBankContext.Clientes
                 .Include(c => c.IdPersonaNavigation)    
-                .FirstOrDefaultAsync(c => c.IdPersona == id);
+                .FirstOrDefaultAsync(c => c.IdCliente == id);
             if (client == null)
                 return NotFound("No existe el Cliente");
             return Ok(client);
