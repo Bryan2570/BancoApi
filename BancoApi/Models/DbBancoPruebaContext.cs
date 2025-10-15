@@ -52,18 +52,24 @@ public partial class DbBancoPruebaContext : DbContext
             entity.HasKey(e => e.IdCuenta);
 
             entity.Property(e => e.IdCuenta)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("idCuenta");
+
             entity.Property(e => e.Estado).HasColumnName("estado");
+
             entity.Property(e => e.NumCuenta)
                 .HasMaxLength(50)
                 .HasColumnName("num_cuenta");
+
             entity.Property(e => e.SaldoInicial)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("saldo_inicial");
+
             entity.Property(e => e.TipoCuenta)
                 .HasMaxLength(50)
                 .HasColumnName("tipo_cuenta");
+
+            entity.Property(e => e.IdCliente).HasColumnName("idCliente");
         });
 
         modelBuilder.Entity<Movimiento>(entity =>
