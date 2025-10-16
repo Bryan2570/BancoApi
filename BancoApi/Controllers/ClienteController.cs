@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BancoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/client")]
     [ApiController]
     public class ClienteController : ControllerBase
     {
@@ -16,8 +16,7 @@ namespace BancoApi.Controllers
             _dbBankContext = dbBankContext;
         }
 
-        [HttpGet]
-        [Route("Lista")]
+        [HttpGet]     
         public async Task<IActionResult> ListClients()
         {
             var listClient = await _dbBankContext.Clientes
@@ -26,8 +25,7 @@ namespace BancoApi.Controllers
             return Ok(listClient);
         }
 
-        [HttpGet]
-        [Route("Lista/{id:int}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetClient(int id)
         {
             var client = await _dbBankContext.Clientes
@@ -39,8 +37,6 @@ namespace BancoApi.Controllers
         }
 
         [HttpPost]
-        [Route("Agregar")]
-
         public async Task<IActionResult> Agregar([FromBody] Cliente requets)
         {            
             if (requets.IdPersonaNavigation != null)
@@ -60,8 +56,7 @@ namespace BancoApi.Controllers
             });
         }
 
-        [HttpPut]
-        [Route("Actualizar/{id:int}")]
+        [HttpPut("{id:int}")]        
         public async Task<IActionResult> Actualizar(int id, [FromBody] Cliente request)
         {
             if (id != request.IdCliente)
@@ -95,8 +90,7 @@ namespace BancoApi.Controllers
             return Ok(clientUpdate);
         }
 
-        [HttpDelete]
-        [Route("Eliminar/{id:int}")]
+        [HttpDelete("{id:int}")]       
         public async Task<IActionResult> Eliminar(int id)
         { 
             var clientDelete = await _dbBankContext.Clientes.FindAsync(id);
