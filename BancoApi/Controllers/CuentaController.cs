@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BancoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/account")]
     [ApiController]
     public class CuentaController : ControllerBase
     {
@@ -16,8 +16,7 @@ namespace BancoApi.Controllers
             _dbBankContext = dbBankContext;
         }
 
-        [HttpGet]
-        [Route("Lista")]
+        [HttpGet]       
         public async Task<IActionResult> ListCuentas()
         {
             var listCuentas = await _dbBankContext.Cuenta.ToListAsync();
@@ -25,8 +24,7 @@ namespace BancoApi.Controllers
         }
 
 
-        [HttpGet]
-        [Route("Lista/{id:int}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCuenta(int id)
         {
             var cuenta = await _dbBankContext.Cuenta
@@ -37,7 +35,6 @@ namespace BancoApi.Controllers
         }
 
         [HttpPost]
-        [Route("Crear")]
         public async Task<IActionResult> Agregar([FromBody] Cuentum request)
         {
             _dbBankContext.Cuenta.Add(request);
@@ -49,8 +46,7 @@ namespace BancoApi.Controllers
             });
         }
 
-        [HttpPut]
-        [Route("Actualizar/{id:int}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Actualizar(int id, [FromBody] Cuentum request)
         {
             var cuenta = await _dbBankContext.Cuenta        
@@ -69,8 +65,7 @@ namespace BancoApi.Controllers
             });
         }
 
-        [HttpDelete]
-        [Route("Eliminar/{id:int}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Eliminar(int id)
         {
             var cuenta = await _dbBankContext.Cuenta

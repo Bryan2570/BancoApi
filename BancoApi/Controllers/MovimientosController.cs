@@ -7,7 +7,7 @@ using System.Reflection.Metadata;
 
 namespace BancoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/movements")]
     [ApiController]
     public class MovimientosController : ControllerBase
     {
@@ -18,15 +18,13 @@ namespace BancoApi.Controllers
         }
 
         [HttpGet]
-        [Route("Lista")]
         public async Task<IActionResult> ListMovimientos()
         {
             var listMovimientos = await _dbBankContext.Movimientos.ToListAsync();
             return Ok(listMovimientos);
         }
 
-        [HttpGet]
-        [Route("Lista/{id:int}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetMovimiento(int id)
         {
             var movimiento = await _dbBankContext.Movimientos
@@ -36,23 +34,19 @@ namespace BancoApi.Controllers
             return Ok(movimiento);
         }
 
-        [HttpPost]
-        [Route("Crear")]
-        public async Task<IActionResult> Agregar([FromBody] Movimiento request)
-        {
-            _dbBankContext.Movimientos.Add(request);
-            await _dbBankContext.SaveChangesAsync();
-            return Ok(new
-            {
-                message = "Movimiento Creado Correctamente!",
-                movimiento = request
-            });
+        //[HttpPost]
+        //public async Task<IActionResult> Agregar([FromBody] Movimiento request)
+        //{
+        //    _dbBankContext.Movimientos.Add(request);
+        //    await _dbBankContext.SaveChangesAsync();
+        //    return Ok(new
+        //    {
+        //        message = "Movimiento Creado Correctamente!",
+        //        movimiento = request
+        //    });
+        //}        
 
-        }
-        
-
-        [HttpPut]
-        [Route("Actualizar/{id:int}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Actualizar(int id, [FromBody] Movimiento request)
         {
             var movimiento = await _dbBankContext.Movimientos
@@ -73,8 +67,8 @@ namespace BancoApi.Controllers
         }
 
 
-        [HttpDelete]
-        [Route("Eliminar/{id:int}")]
+        [HttpDelete("{id:int}")]
+
         public async Task<IActionResult> Eliminar(int id)
         {
             var movimiento = await _dbBankContext.Movimientos
@@ -92,7 +86,6 @@ namespace BancoApi.Controllers
 
 
         [HttpPost]
-        [Route("RegistrarMovimiento")]
         public async Task<IActionResult> RegistrarMovimiento([FromBody] Movimiento request)
         {
             if (request == null)
@@ -168,7 +161,7 @@ namespace BancoApi.Controllers
 
 
         [HttpGet]
-        [Route("EstadoCuenta/{id:int}")]
+        [Route("generatePDF")]
         public async Task<IActionResult> GenerarReporte([FromQuery] int clienteId, [FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
         {
             // 1️⃣ Obtener cliente
