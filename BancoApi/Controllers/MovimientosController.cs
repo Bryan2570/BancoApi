@@ -162,77 +162,67 @@ namespace BancoApi.Controllers
 
         [HttpGet]
         [Route("generatePDF")]
-        public async Task<IActionResult> GenerarReporte([FromQuery] int clienteId, [FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
+        public async Task<IActionResult> GenerarReporte([FromQuery] int id, [FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
         {
-            // 1️⃣ Obtener cliente
             var cliente = await _dbBankContext.Clientes
                 .Include(cl => cl.IdPersonaNavigation)
-                .FirstOrDefaultAsync(cl => cl.IdCliente == clienteId);
+                .FirstOrDefaultAsync(cl => cl.IdCliente == id);
 
             if (cliente == null)
                 return NotFound("El cliente no existe.");
 
-            // 2️⃣ Obtener todas las cuentas del cliente
+  
             var cuentas = await _dbBankContext.Cuenta
-                .Where(c => c.IdCliente == clienteId)
+                .FirstOrDefaultAsync(cl => cl.IdCliente == id);         
+            
+            var cuentasReporte = new List<object>();
+            
+            var movimientos = await _dbBankContext.Movimientos
+                .Where(m => m.IdCuenta == id &&
+                            m.Fecha >= fechaInicio &&
+                            m.Fecha <= fechaFin)
+                .OrderBy(m => m.Fecha)
                 .ToListAsync();
 
-            if (!cuentas.Any())
-                return NotFound("El cliente no tiene cuentas asociadas.");
+            decimal saldoInicial = cuentas.SaldoInicial;
+            decimal totalCreditos = movimientos
+                .Where(m => m.TipoMovimiento == "DEPOSITO")
+                .Sum(m => m.Valor);
 
-            // 3️⃣ Para cada cuenta, obtener movimientos y calcular totales
-            var cuentasReporte = new List<object>();
-            foreach (var cuenta in cuentas)
+            decimal totalDebitos = movimientos
+                .Where(m => m.TipoMovimiento == "RETIRO")
+                .Sum(m => m.Valor);
+
+            decimal saldoFinal = saldoInicial + totalCreditos - totalDebitos;
+
+            cuentasReporte.Add(new
             {
-                var movimientos = await _dbBankContext.Movimientos
-                    .Where(m => m.IdCuenta == cuenta.IdCuenta &&
-                                m.Fecha >= fechaInicio &&
-                                m.Fecha <= fechaFin)
-                    .OrderBy(m => m.Fecha)
-                    .ToListAsync();
-
-                decimal saldoInicial = cuenta.SaldoInicial;
-                decimal totalCreditos = movimientos
-                    .Where(m => m.TipoMovimiento == "DEPOSITO")
-                    .Sum(m => m.Valor);
-
-                decimal totalDebitos = movimientos
-                    .Where(m => m.TipoMovimiento == "RETIRO")
-                    .Sum(m => m.Valor);
-
-                decimal saldoFinal = saldoInicial + totalCreditos - totalDebitos;
-
-                cuentasReporte.Add(new
+                NumeroCuenta = cuentas.NumCuenta,
+                SaldoInicial = saldoInicial,
+                SaldoFinal = saldoFinal,
+                TotalCreditos = totalCreditos,
+                TotalDebitos = totalDebitos,
+                Movimientos = movimientos.Select(m => new
                 {
-                    NumeroCuenta = cuenta.NumCuenta,
-                    SaldoInicial = saldoInicial,
-                    SaldoFinal = saldoFinal,
-                    TotalCreditos = totalCreditos,
-                    TotalDebitos = totalDebitos,
-                    Movimientos = movimientos.Select(m => new
-                    {
-                        m.IdMovimiento,
-                        m.Fecha,
-                        m.TipoMovimiento,
-                        m.Valor,
-                        m.Saldo
-                    }).ToList()
-                });
-            }
-
-            // 4️⃣ Armar JSON final
+                    m.IdMovimiento,
+                    m.Fecha,
+                    m.TipoMovimiento,
+                    m.Valor,
+                    m.Saldo
+                }).ToList()
+            });            
+    
             var resultado = new
             {
                 Cliente = cliente.IdPersonaNavigation.Nombre,
                 Cuentas = cuentasReporte
             };
 
-            // 5️⃣ Generar PDF en memoria
+            // Generar PDF 
             using var ms = new MemoryStream();
             var document = new iTextSharp.text.Document();
             PdfWriter.GetInstance(document, ms);
             document.Open();
-
            
             var tituloFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
           
@@ -242,9 +232,8 @@ namespace BancoApi.Controllers
                 SpacingAfter = 20f 
             };
 
-            // Agregar título al documento
+            // Título
             document.Add(titulo);
-
 
             document.Add(new Paragraph($"Nombre: {resultado.Cliente}"));
             document.Add(new Paragraph($"Fecha Inicial: {fechaInicio:yyyy-MM-dd}"));
@@ -266,8 +255,8 @@ namespace BancoApi.Controllers
                 table.AddCell("Valor");
                 table.AddCell("Saldo");
 
-                var movimientos = cuenta.GetType().GetProperty("Movimientos").GetValue(cuenta) as IEnumerable<object>;
-                foreach (var mov in movimientos)
+                var movimientosPDF = cuenta.GetType().GetProperty("Movimientos").GetValue(cuenta) as IEnumerable<object>;
+                foreach (var mov in movimientosPDF)
                 {
                     var fecha = mov.GetType().GetProperty("Fecha").GetValue(mov);
                     var tipo = mov.GetType().GetProperty("TipoMovimiento").GetValue(mov);
@@ -303,8 +292,6 @@ namespace BancoApi.Controllers
                 PdfBase64 = pdfBase64
             });
         }
-
-
 
     }
 }
