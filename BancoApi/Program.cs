@@ -39,10 +39,11 @@ if (app.Environment.IsDevelopment())
 {                                            
     app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();                                                               
+    app.UseSwaggerUI();              
+    
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
