@@ -37,21 +37,11 @@ namespace BancoApi.Controllers
         {
             try
             {
-                var listmovimiento = await _dbBankContext.Movimientos
-                .Where(mv => mv.IdCuenta == id)
-               .Select(mv => new
-               {
-                   mv.Fecha,
-                   mv.TipoMovimiento,
-                   mv.Valor,
-                   mv.Saldo              
-               })
-               .ToListAsync();
-
-                if (listmovimiento == null || !listmovimiento.Any())
-                    return NotFound("No existen movimientos para la cuenta indicada");
-
-                return Ok(listmovimiento);
+                var movimiento = await _dbBankContext.Movimientos
+                .FirstOrDefaultAsync(m => m.IdMovimiento == id);
+                if (movimiento == null)
+                    return NotFound("No existe el Movimiento");
+                return Ok(movimiento);
             }
             catch (Exception ex)
             {
