@@ -36,11 +36,21 @@ namespace BancoApi.Controllers
         {
             try
             {
-                var cuenta = await _dbBankContext.Cuenta
-                .FirstOrDefaultAsync(c => c.IdCuenta == id);
-                if (cuenta == null)
-                    return NotFound("No existe la Cuenta");
-                return Ok(cuenta);
+                var listCuentas = await _dbBankContext.Cuenta                
+           .Where(ct => ct.IdCliente == id)
+           .Select(ct => new
+           {  
+               ct.NumCuenta,
+               ct.TipoCuenta,
+               ct.SaldoInicial,
+               ct.Estado
+           })
+           .ToListAsync();
+
+                if (listCuentas == null || !listCuentas.Any())
+                    return NotFound("No existen cuentas para el cliente indicado");
+
+                return Ok(listCuentas);
             }
             catch (Exception ex)
             {
@@ -48,6 +58,7 @@ namespace BancoApi.Controllers
             }            
         }
 
+       
         [HttpPost]
         public async Task<IActionResult> Agregar([FromBody] Cuentum request)
         {
