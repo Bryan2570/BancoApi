@@ -82,9 +82,7 @@ namespace BancoApi.Controllers
         {
             try
             {
-                if (id != request.IdCliente)
-                    return BadRequest("No existe el Cliente");
-
+               
                 var clientUpdate = await _dbBankContext.Clientes
                     .Include(c => c.IdPersonaNavigation)
                     .FirstOrDefaultAsync(c => c.IdCliente == id);
@@ -93,7 +91,7 @@ namespace BancoApi.Controllers
 
                 clientUpdate.Contrasena = request.Contrasena;
                 clientUpdate.Estado = request.Estado;
-                clientUpdate.IdPersona = request.IdPersona;
+               
 
                 if (request.IdPersonaNavigation != null)
                 {

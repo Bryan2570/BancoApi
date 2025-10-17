@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Cors", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200") 
+            .WithOrigins("http://localhost:4200", "https://c769e0ac0420.ngrok-free.app/api/v1/client") 
             .AllowAnyHeader() 
             .AllowAnyMethod(); 
     });
@@ -36,10 +36,10 @@ app.UseCors("Cors");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
+{                                            
     app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI();                                                               
 }
 
 app.UseHttpsRedirection();
